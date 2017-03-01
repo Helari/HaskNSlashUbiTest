@@ -34,7 +34,7 @@ void ANDU_SwordBase::BeginPlay()
 {
 	Super::BeginPlay();
 	SetActive(true);
-	PowerUpdateDelay = 2.0f;
+	PowerUpdateDelay = 0.f;
 	PowerUpdateDelta = 0.0f;
 	ShouldUpdatePower = false;
 }

@@ -18,8 +18,38 @@ ANDU_SwordPickup::ANDU_SwordPickup()
 
 	ActivationTrigger->OnComponentBeginOverlap.AddDynamic(this, &ANDU_SwordPickup::OnActivationTriggerBoxOverlapBegin);
 	ActivationTrigger->OnComponentEndOverlap.AddDynamic(this, &ANDU_SwordPickup::OnActivationTriggerBoxOverlapEnd);
+
+	DecayRate = 0.f;
+	LifeSpan = 5.0f;
+	CurrentLifeSpan = LifeSpan;
 }
 
+void ANDU_SwordPickup::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	if (GetCurrentLifeSpan() > 0)
+	{
+		UpdateLifeSpan(-DeltaTime*DecayRate*(GetLifeSpan()));
+		LifeSpanChangeEffect();
+	}
+	else
+	{
+		HolderCharacter->CurrentSword = NULL;
+		Destroy();
+	}
+}
+float ANDU_SwordPickup::GetLifeSpan()
+{
+	return LifeSpan;
+}
+float ANDU_SwordPickup::GetCurrentLifeSpan()
+{
+	return CurrentLifeSpan;
+}
+void ANDU_SwordPickup::UpdateLifeSpan(float LifeSpanAmount)
+{
+	CurrentLifeSpan = CurrentLifeSpan + LifeSpanAmount;
+}
 void ANDU_SwordPickup::OnActivationTriggerBoxOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if ((OtherActor != nullptr) && (OtherActor != this))
@@ -27,8 +57,11 @@ void ANDU_SwordPickup::OnActivationTriggerBoxOverlapBegin(UPrimitiveComponent* O
 		AHackNSlashCharacter* character = Cast<AHackNSlashCharacter>(OtherActor);
 		if (character)
 		{
-			character->CurrentSword = this;
-			character->SetCanCollectSword(true);
+			if (!character->CurrentSword)
+			{
+				character->CurrentSword = this;
+				character->SetCanCollectSword(true);
+			}
 		}
 	}
 }
@@ -42,4 +75,11 @@ void ANDU_SwordPickup::OnActivationTriggerBoxOverlapEnd(UPrimitiveComponent* Ove
 			character->SetCanCollectSword(false);
 		}
 	}
+}
+
+void ANDU_SwordPickup::WasCollected(AHackNSlashCharacter* _HolderCharacter)
+{
+	HolderCharacter = _HolderCharacter;
+	CurrentLifeSpan = LifeSpan;
+	DecayRate = 0.1f;
 }

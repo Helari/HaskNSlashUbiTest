@@ -117,7 +117,7 @@ void AHackNSlashCharacter::CollectPickups()
 					//CurrentSwordBase->AddPower(1.0f);//UpdatePower(1.0f);
 				}
 				/*ANDU_SwordBase* swordBase = Cast<ANDU_SwordBase>(tmpBattery->GetLinkedSwordBase());
-				if (swordBase)
+				if (swordBase)  
 				{
 					swordBase->UpdatePower(1.0f);
 				}*/
@@ -131,6 +131,7 @@ void AHackNSlashCharacter::CollectPickups()
 				{
 					FAttachmentTransformRules attachementRules = FAttachmentTransformRules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, true);
 					CurrentSword->AttachToComponent(GetMesh(), attachementRules, FName("Weapon"));
+					CurrentSword->WasCollected(this);
 					//CurrentSword->AttachRootComponentTo(GetMesh(), FName("Weapon"), EAttachLocation::SnapToTarget);
 					SetCanCollectSword(false);
 					CurrentSwordBase->ShutdownPositionIndicator();
