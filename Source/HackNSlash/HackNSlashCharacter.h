@@ -108,11 +108,7 @@ public:
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 	/** Returns CollectionSphere subobject **/
 	FORCEINLINE class USphereComponent* GetCollectionSphere() const { return CollectionSphere; }
-
-	//TODO
-	//CurrentSword
-	//CurrentSwordBase
-
+	
 	UFUNCTION(BlueprintPure, Category = "Sword")
 		bool GetCanCollectSword();
 	UFUNCTION(BlueprintCallable, Category = "Sword")
@@ -129,5 +125,43 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Sword")
 		class ANDU_SwordPickup* GetCurrentSword() const;
+
+//RobotControlelr integration
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom character controller", Meta = (BlueprintProtected = "true"))
+		bool IsPunching;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom character controller", Meta = (BlueprintProtected = "true"))
+		bool IsSmashLocationValid;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom character controller", Meta = (BlueprintProtected = "true"))
+		bool IsSmashRotation;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom character controller", Meta = (BlueprintProtected = "true"))
+		bool IsCameraRotationForced;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom character controller", Meta = (BlueprintProtected = "true"))
+		bool IsDashing;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom character controller", Meta = (BlueprintProtected = "true"))
+		bool IsCameraDistantForBackWalk;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom character controller", Meta = (BlueprintProtected = "true"))
+		int32 DashStrengh;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom character controller", Meta = (BlueprintProtected = "true"))
+		int32 SmashStrengh;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom character controller", Meta = (BlueprintProtected = "true"))
+		float SmashMaxRange;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom character controller", Meta = (BlueprintProtected = "true"))
+		float DeltaSecondsInternal;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom character controller", Meta = (BlueprintProtected = "true"))
+		float SmashYawRotation;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom character controller", Meta = (BlueprintProtected = "true"))
+		float HorizontalDirectionFromCamera;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom character controller", Meta = (BlueprintProtected = "true"))
+		float CameraSideRotationMax;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom character controller", Meta = (BlueprintProtected = "true"))
+		float BackwardCameraDistance;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom character controller", Meta = (BlueprintProtected = "true"))
+		FVector SmashLocation;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom character controller", Meta = (BlueprintProtected = "true"))
+		FVector CamToMeshDirection;
+
+	UFUNCTION(BlueprintCallable, Category = "Custom character controller")
+		void UpdateMovement(float DeltaSeconds, FVector OldLocation, FVector OldVelocity);
 };
 

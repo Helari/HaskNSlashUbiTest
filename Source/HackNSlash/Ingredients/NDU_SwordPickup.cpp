@@ -38,7 +38,7 @@ void ANDU_SwordPickup::Tick(float DeltaTime)
 		Destroy();
 	}
 }
-float ANDU_SwordPickup::GetLifeSpan()
+float ANDU_SwordPickup::GetInitialLifeSpan()
 {
 	return LifeSpan;
 }

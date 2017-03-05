@@ -19,7 +19,7 @@ public:
 	void Tick(float DeltaTime) override;
 
 	UFUNCTION(BlueprintPure, Category = "Sword")
-		float GetLifeSpan();
+		float GetInitialLifeSpan();
 	UFUNCTION(BlueprintPure, Category = "Sword")
 		float GetCurrentLifeSpan();
 	UFUNCTION(BlueprintCallable, Category = "Sword")

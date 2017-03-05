@@ -15,6 +15,8 @@
 
 AHackNSlashCharacter::AHackNSlashCharacter()
 {
+	PrimaryActorTick.bCanEverTick = false;
+
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 
@@ -39,6 +41,20 @@ AHackNSlashCharacter::AHackNSlashCharacter()
 	CameraBoom->TargetArmLength = 300.0f; // The camera follows at this distance behind the character	
 	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
 
+	CameraBoom->bEnableCameraLag = true;
+	CameraBoom->CameraLagSpeed = 4.f;
+	CameraBoom->CameraLagMaxDistance = 500.f;
+
+	BaseTurnRate = 100.f;
+	BaseLookUpRate = -70.f;
+	DashStrengh = 10000;
+	SmashStrengh = 10;
+	SmashMaxRange = 2500.f;
+	CameraSideRotationMax = 60.f;
+	BackwardCameraDistance = 800.f;
+	
+	OnCharacterMovementUpdated.AddDynamic(this, &AHackNSlashCharacter::UpdateMovement);
+
 	// Create a follow camera
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
@@ -62,6 +78,14 @@ AHackNSlashCharacter::AHackNSlashCharacter()
 
 //////////////////////////////////////////////////////////////////////////
 // Input
+
+void AHackNSlashCharacter::UpdateMovement(float DeltaSeconds, FVector OldLocation, FVector OldVelocity)
+{
+	if (GEngine)
+	{
+		DeltaSecondsInternal = DeltaSeconds;
+	}
+}
 
 void AHackNSlashCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
@@ -205,15 +229,42 @@ void AHackNSlashCharacter::LookUpAtRate(float Rate)
 
 void AHackNSlashCharacter::MoveForward(float Value)
 {
-	if ((Controller != NULL) && (Value != 0.0f))
+	if ((Controller != NULL))
 	{
-		// find out which way is forward
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
+		if ((Value != 0.0f))
+		{
+			// find out which way is forward
+			const FRotator Rotation = Controller->GetControlRotation();
+			const FRotator YawRotation(0, Rotation.Yaw, 0);
 
-		// get forward vector
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-		AddMovementInput(Direction, Value);
+			// get forward vector
+			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+			AddMovementInput(Direction, Value);
+		}
+
+		IsCameraDistantForBackWalk = false;
+		CamToMeshDirection = (GetMesh()->GetComponentLocation() - FollowCamera->GetComponentLocation()).GetSafeNormal();
+		if (Dot3(GetMesh()->GetRightVector().GetSafeNormal(), CamToMeshDirection) < -0.3f)
+		{
+			IsCameraDistantForBackWalk = true;
+		}
+		BackwardCameraDistance = 300.f;
+		//Interp SpringArm to 800 (backward value)
+		if (IsCameraDistantForBackWalk)
+		{
+			BackwardCameraDistance = 800.f;
+		}
+		//Interp SpringArm to 600 (jumping value)
+		else if (GetCharacterMovement()->IsFalling())
+		{
+			BackwardCameraDistance = 600.f;
+		}
+		if (GEngine)
+		{
+
+			GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Magenta, FString::Printf(TEXT("Some variable values: x: %f"), BackwardCameraDistance));
+		}
+		CameraBoom->TargetArmLength = FMath::FInterpTo(CameraBoom->TargetArmLength, BackwardCameraDistance, DeltaSecondsInternal, 1.5f);
 	}
 }
 
