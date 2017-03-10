@@ -27,15 +27,18 @@ ANDU_SwordPickup::ANDU_SwordPickup()
 void ANDU_SwordPickup::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (GetCurrentLifeSpan() > 0)
+	if(DecayRate != 0.f)
 	{
-		UpdateLifeSpan(-DeltaTime*DecayRate*(GetLifeSpan()));
-		LifeSpanChangeEffect();
-	}
-	else
-	{
-		HolderCharacter->CurrentSword = NULL;
-		Destroy();
+		if (GetCurrentLifeSpan() > 0)
+		{
+			UpdateLifeSpan(-DeltaTime*DecayRate*(GetInitialLifeSpan()));
+			LifeSpanChangeEffect();
+		}
+		else
+		{
+			HolderCharacter->CurrentSword = NULL;
+			Destroy();
+		}
 	}
 }
 float ANDU_SwordPickup::GetInitialLifeSpan()
@@ -82,4 +85,5 @@ void ANDU_SwordPickup::WasCollected(AHackNSlashCharacter* _HolderCharacter)
 	HolderCharacter = _HolderCharacter;
 	CurrentLifeSpan = LifeSpan;
 	DecayRate = 0.1f;
+	GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Magenta, FString::Printf(TEXT("SWORD COLLECTED")));
 }

@@ -7,7 +7,7 @@ UCLASS(config=Game)
 class AHackNSlashCharacter : public ACharacter
 {
 	GENERATED_BODY()
-
+	virtual void BeginPlay() override;
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
@@ -19,6 +19,14 @@ class AHackNSlashCharacter : public ACharacter
 	/** Collection sphere */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 		class USphereComponent* CollectionSphere;
+
+	/** Smash target displayed on the floor when jumping */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+		class UStaticMeshComponent* SmashTarget;
+	/** Dash FX on the floor when jumping */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+		class UParticleSystemComponent* DashTrailFX;
+
 public:
 	AHackNSlashCharacter();
 
@@ -108,7 +116,11 @@ public:
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 	/** Returns CollectionSphere subobject **/
 	FORCEINLINE class USphereComponent* GetCollectionSphere() const { return CollectionSphere; }
-	
+	/** Returns SmashTarget subobject **/
+	FORCEINLINE class UStaticMeshComponent* GetSmashTarget() const { return SmashTarget; }
+	/** Returns DashTrailFX subobject **/
+	FORCEINLINE class UParticleSystemComponent* GetDashTrailFX() const { return DashTrailFX; }
+
 	UFUNCTION(BlueprintPure, Category = "Sword")
 		bool GetCanCollectSword();
 	UFUNCTION(BlueprintCallable, Category = "Sword")
@@ -163,5 +175,47 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Custom character controller")
 		void UpdateMovement(float DeltaSeconds, FVector OldLocation, FVector OldVelocity);
+
+	UFUNCTION(BlueprintCallable, Category = "Custom character controller")
+		void Jump() override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom character controller", Meta = (BlueprintProtected = "true"))
+		UTimelineComponent* JumpGravityTimeline;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom character controller", Meta = (BlueprintProtected = "true"))
+		UCurveFloat* fJumpGravityCurve;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom character controller", Meta = (BlueprintProtected = "true"))
+		TSubclassOf<class UCameraShake> SmashCameraShake;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom character controller", Meta = (BlueprintProtected = "true"))
+		UParticleSystem* DashExplosionFX;
+
+	UFUNCTION(BlueprintCallable, Category = "Dash")
+		void Dash();
+
+	FOnTimelineFloat InterpGravityFunction{};
+	FOnTimelineEvent InterpGravityCallback{};
+
+
+	UFUNCTION()
+		void JumpGravityTimelineFloatReturn(float val);
+	/*UFUNCTION()
+		void JumpGravityTimelineCallback();*/
+
+	void Landed(const FHitResult& Hit) override;
+
+	FTimerHandle DashHideTimer;
+
+	UFUNCTION()
+		void DashHide();
+	UFUNCTION()
+		void DashShow();
+	UFUNCTION()
+		void DeactivateDashTrail();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom character controller", Meta = (BlueprintProtected = "true"))
+		UParticleSystem* SmashExplosionFX;
+
+	UFUNCTION(BlueprintCallable, Category = "Custom character controller")
+		void Smash();
 };
 
